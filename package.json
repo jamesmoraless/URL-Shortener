@@ -1,0 +1,23 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "- Familiarize oneself with git commands and git/github interactions \r - Create README.md file in the desired local folder \r - Stage, Commit and Push changes to an empty github repo \r - Add a .js file in the folder and begin step 2",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesmoraless/URL-Shortener.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jamesmoraless/URL-Shortener/issues"
+  },
+  "homepage": "https://github.com/jamesmoraless/URL-Shortener#readme"
+}
