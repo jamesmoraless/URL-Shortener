@@ -26,6 +26,19 @@ app.post('/tshirt/:id', (req, res) => {
     res.send({tshirt: `X with your ${logo} and ID of ${id}`})
 });
 
+//I need to add a html text box where you can insert a URL and that could be used as the request
+//Then, the request (url) can be stored in a newLink = "shorturl.at/randomeChar() + randomeChar() + randomChar() + randomeChar()"
+// app.patch('/here I need the link to be updated/shortened', (req, res) => {
+//     const { link } = req.params;
+
+//     if (!link)
+//     {
+//         res.status(418).send({message: 'We need a link!'})
+//     }
+
+//     res.send({shortUrl: `${link}`})
+// });
+
 
 app.listen(
     PORT, () => console.log(`its alive on http://localhost:${PORT}`)
