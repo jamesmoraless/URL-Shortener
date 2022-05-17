@@ -1,7 +1,14 @@
 /** Things to work on -->
  * Figure out how to add the client interface to interact with the api (change most of the post method)
  * Find out how to reset the database to avoid storage issues 
- * Make sure id's are unique and that they dont point at any other links 
+ * 
+ * Create a data table with usernames and passwords that the user inserts, then they get stored and points to a table of the user
+ *  return a true or false, then return a password unique to the user 
+ *  If the account username already exists, return "this account already exists"
+ * 
+ * 
+ * 
+ * Make sure website id's are unique and that they dont point at any other links 
  * Clean up the code and delete any random console.log points 
  * 
  */
@@ -64,6 +71,10 @@ app.get('/:id', (req, res) => {
 
 });
 
+db.run("DELETE FROM oLinks");//deleted my table at the end of running the server 
+
 app.listen(
     PORT, () => console.log(`its alive on http://localhost:${PORT}`)
 )//runs the API on a server defined by the port (port location, function)
+
+
