@@ -12,6 +12,7 @@ class DatabaseService {
       }
     ); //connects to the database
   }
+  
   generateID(length) {
     return parseInt(
       Math.ceil(Math.random() * Date.now())
@@ -20,12 +21,14 @@ class DatabaseService {
         .replace(".", "")
     );
   }
+  
   insertLink(id, link) {
     const sqlInto = "INSERT INTO myLinks(id, originLink) VALUES (?,?)"; //reusable query to insert a row into the table with an id and origin link value
     this._db.run(sqlInto, [id, link], (err) => {
       if (err) console.error(err.message);
     }); //adds a row with the inputted data
   }
+  
   readAllLinks() {
     const sqlSelect = "SELECT * FROM myLinks"; //reusable query to select all rows from the table in order to visualize changes
 
@@ -36,6 +39,7 @@ class DatabaseService {
       });
     }); //prints out all the rows in the database
   }
+  
   getOriginLink(id) {
     return new Promise((resolve, reject) => {
       const sqlSelect1 = `SELECT originLink FROM myLinks WHERE id = ${id}`; //retrieves the original link from the provided id

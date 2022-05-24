@@ -2,8 +2,8 @@ const express = require("express");
 const app = express(); //initializes the app
 const PORT = 8080;
 
-const databaseService = require("./service.js");
-const storager = new databaseService(); //instantiates a DatabaseService object
+const DatabaseService = require("./service.js");
+const storager = new DatabaseService(); //instantiates a DatabaseService object
 app.use(express.json()); //middleware that makes the request into a json object
 app.use(express.static("public")); //this middleware gets the static files in public folder and executes this before anything below
 
