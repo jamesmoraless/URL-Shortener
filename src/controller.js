@@ -37,11 +37,19 @@ const addUser = (req, res) => {
   });
 };
 
+
 ////must add a storeLink method that:
 //stores the original link 
 //generates a short link id
 //stores the original link with the user's username, and the short link id 
 //then after an add, refresh the page to view links table 
+const addLink = (req, res) => {
+  const {username, originallink, shortlink} = req.body;//later decomposed with JS json parsing
+  pool.query(queries.addLink, [username, originallink, shortlink], (err, results) => {
+    if (err) throw err;
+    res.status(200).send("succesfully added a link");
+  })
+}
 
 ////must add a deleteLink method that:
 //once you click a button on the html site, you can delete this row 
@@ -57,6 +65,7 @@ module.exports = {
   getLinks,
   getOLinkByShort,
   addUser,
+  addLink,
 };
 
 /*
