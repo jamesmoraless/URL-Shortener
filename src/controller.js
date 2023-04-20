@@ -1,19 +1,62 @@
-//controller is used for handling api methods 
+//controller is used for handling requests and responses  
 const pool = require('../db');
-const createAccount = (req, res) => {
-  const {username, password} = req.body;
+const queries = require('./queries')
+
+//get original and short links from an account username 
+//must add the username checking functionality 
+const getLinks = (req, res) => {
+  pool.query(queries.getLinks, (err, results)=>{
+    if (err) throw err;
+    res.status(200).json(results.rows);
+  })
+};
+//get redirected to the original link with the short link id
+const getOLinkByShort = (req, res) => {
+  const id = parseInt(req.params.id);
+  pool.query(queries.getOLinkByShort, [id], (err, results)=>{
+    if(err) throw err;
+    res.status(200).redirect(results.rows[0].originallink);
+  });
+};
+
+
+const addUser = (req, res) => {
+  const {username, password} = req.body;//create a password for the user 
 
   //check if username exists 
-  pool.query(queries.checkUsernameExists, [username], (err, result)=>{
-    if (result.rows.length){
-      res.send("username already exists.");
+  pool.query(queries.checkUsernameExists, [username], (err, results)=>{    
+    if (results.rows.length){
+      res.send("Username already exists. Try another username.");
     }
   });
-  
-}
+  //add user to db
+  pool.query(queries.addUser, [username, password], (err, results) =>{
+    if (err) throw err;
+    res.status(200).send("succesfully added user");//I want this to then send you to a new page that welcomes you 
+    //and then allows you to shorten links 
+  });
+};
+
+////must add a storeLink method that:
+//stores the original link 
+//generates a short link id
+//stores the original link with the user's username, and the short link id 
+//then after an add, refresh the page to view links table 
+
+////must add a deleteLink method that:
+//once you click a button on the html site, you can delete this row 
+
+//must add a Login method that:
+//checks if username exists, if so 
+//find the username such that the inserted password is linked to it, if the rows is greather than 1... 
+////redirect to welcome page same as the addUser method 
+//if not, send a message saying the username doesnt exist 
+
 
 module.exports = {
-  createAccount,
+  getLinks,
+  getOLinkByShort,
+  addUser,
 };
 
 /*
