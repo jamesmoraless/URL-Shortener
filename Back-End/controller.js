@@ -94,7 +94,7 @@ const logUser = async (req, res) => {
 //get redirected to the original link with the short link id
   const getOLinkByShort = async (req, res) => {
     try{
-      const {short_id} = req.params.id;
+      const {short_id} = req.params;
       const url = await pool.query(queries.getOLinkByShort, [short_id]);
       if (url.rows.length === 0){
         return res.status(400).json({ message: 'URL not found'});
