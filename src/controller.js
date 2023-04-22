@@ -3,29 +3,7 @@ const pool = require('../db');
 const queries = require('./queries');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-//const nanoid = require('nanoid').nanoid;
-
-
-//get original and short links from an account username 
-const getLinks = (req, res) => {
-  const {username} = req.body;
-  pool.query(queries.getLinks, [username], (err, results)=>{
-    if (err) throw err;
-    res.status(200).json(results.rows);
-  })
-};
-
-//get redirected to the original link with the short link id
-const getOLinkByShort = (req, res) => {
-  const id = parseInt(req.params.id);
-  pool.query(queries.getOLinkByShort, [id], (err, results)=>{
-    if(err) throw err;
-    if (results.rows){
-    res.status(200).redirect(results.rows[0].originallink);
-  }
-  });
-};
-
+const {nanoid} = require('nanoid/non-secure');
 
 const addUser = async (req, res) => {
   try{
@@ -83,99 +61,76 @@ const logUser = async (req, res) => {
     res.status(500).send('Server error.');
     }
     };
-    
-
-  /* // Hash the password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  //add user to db IF username does not exist 
-  const newUser = await pool.query(queries.addUser, [username, hashedPassword]);
-  res.status(201).json(newUser.rows[0]);//I want this to then send you to a new page that welcomes you 
-    //and then allows you to shorten links 
-    }catch (error){
-      console.error(err.message);
-      res.status(500).send('Server error');
-}
-}; */
-
-////must add a storeLink method that:
-//stores the original link 
-//generates a short link id
-//stores the original link with the user's username, and the short link id 
-//then after an add, refresh the page to view links table 
-const addLink = (req, res) => {
-  const {username, originallink, shortlink} = req.body;//later decomposed with JS json parsing
-  pool.query(queries.addLink, [username, originallink, shortlink], (err, results) => {
-    if (err) throw err;
-    res.status(200).send("succesfully added a link");
-  });
-};
-
-////must add a deleteLink method that:
-//once you click a button on the html site, you can delete this row 
-
-//must add a Login method that:
-//checks if username exists, if so 
-//find the username such that the inserted password is linked to it, if the rows is greather than 1... 
-////redirect to welcome page same as the addUser method 
-//if not, send a message saying the username doesnt exist 
 
 
+  //authenticate the user (used in all methods)
+  const authenticate = (req, res, next) => {
+    const token = req.header('x-auth-token');
+    if (!token) return res.status(401).json({ message: 'No token, autorization failed.'});
+
+    try{
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      req.user = decoded.user;
+      next();
+    } catch (err){
+      res.status(401).json({ message: 'Invalid token.'});
+    }
+  };
+
+  //create short URL
+  const addLink = async (req, res) => {
+    try{
+      const {long_url} = req.body;//later decomposed with JS json parsing
+      const short_id = nanoid(10);//generates a unique 10 space id
+
+      const newUrl = await pool.query(queries.addLink, [req.user.id, long_url, short_id]);
+      res.json(newUrl.rows[0]);
+    }catch(err){
+      res.status(500).send('Server error.');
+    }
+  };
+
+
+//get redirected to the original link with the short link id
+  const getOLinkByShort = async (req, res) => {
+    try{
+      const {short_id} = req.params.id;
+      const url = await pool.query(queries.getOLinkByShort, [short_id]);
+      if (url.rows.length === 0){
+        return res.status(400).json({ message: 'URL not found'});
+      }
+      res.status(200).redirect(url.rows[0].long_url);
+    }catch(err){
+      console.log(err.message);
+      res.status(500).send('Server error.');
+    }  
+  };
+
+   //get original and short links from an account username 
+  const getLinks = async (req, res) => {
+    try{
+      const userId = req.user.id;
+      //Fetch the URL statistics from the db
+      const stats = await pool.query(queries.getLinks, [userId]);
+      //console.log(stats);
+      const statsObj = stats.rows.reduce((acc, row) => {
+        acc[row.long_url] = row.url_count;
+        return acc;
+      }, {});
+      res.json(statsObj);
+
+    }catch(err){
+      console.error(err);
+      res.status(500).send('Server error.')
+    }
+  }; 
+       
 module.exports = {
   getLinks,
   getOLinkByShort,
   addUser,
   logUser,
+  authenticate,
   addLink,
 };
 
-
-/*
-const DatabaseService = require("../service.js");
-const storager = new DatabaseService(); //instantiates a DatabaseService object
-
-app.post("/account", (req, res) => {
-  const { username } = req.body; 
-  if (storager.checkIfUsernameExists(username)) {
-    res.status(418).send({ message: "This username already exists!" });
-  } 
-  res.status(200).send(`http://localhost:${PORT}/shorten`);
-});
-
-app.post("/shorten", (req, res) => {
-  const { link } = req.body; 
-  const { username } = req.body;
-  let id = storager.generateID(6);
-  if (!link || !username) {
-    res.status(418).send({ message: "We need a link AND username!" });
-  }
-  storager.insertLink(id, link, username);
-  res.status(200).send(`http://localhost:${PORT}/${id}`);
-  storager.readAllLinks();
-
-});
-
-app.get("/statistics", (req, res) => {
-  const { username } = req.body;
-  if(storager.checkIfUsernameExists(username)){
-    storager.readAllLinks(username);
-    res.status(200).send({message: "Username exists and I must return the user info"})
-  }
-  else{
-    res.status(400).send({message: "Username does not exist"})
-  }
-});
-
-app.get("/:id", (req, res) => {
-  const { id } = req.params;
-  const { username } = req.body;
-  storager.getOriginLink(id,username).then((rs) => {
-    console.log(rs);
-
-    //res.status(200).redirect(rs[0].originLink);
-  }).catch(err => {console.log(err);});
-});
-
-storager.clearLinksList();
-*/

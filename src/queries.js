@@ -1,10 +1,10 @@
 //this file is used to seperate the queries with the controller methods since it would allow for ease of readability 
 //and scalability when it comes to longer queries and more complexe APIs
-const getLinks = "SELECT links.originallink, shortlink FROM links WHERE links.username = $1";
-const getOLinkByShort = "SELECT originallink FROM links WHERE shortlink = $1";//$1 is the parameter passed into the query 
+const getLinks = "SELECT long_url, COUNT(long_url) AS url_count FROM links WHERE user_id = $1 GROUP BY long_url";
+const getOLinkByShort = "SELECT long_url FROM links WHERE short_id = $1";//$1 is the parameter passed into the query 
 const checkUsernameExists = "SELECT * FROM users WHERE username = $1";//alias for username 
 const addUser = "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *";//two arguments passed into the query
-const addLink = "INSERT INTO links (username, originallink, shortlink) VALUES ($1, $2, $3)";//3 arguments passed and organised with a username 
+const addLink = "INSERT INTO links (user_id, long_url, short_id) VALUES ($1, $2, $3) RETURNING *";//3 arguments passed and organised with a user_id 
 
 module.exports = {
     getLinks,
