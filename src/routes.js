@@ -12,7 +12,7 @@ router.get('/myLinks', controller.getLinks);//get all links related to a usernam
 
 router.get('/:id', controller.getOLinkByShort);//get redirected to the original link
 
-router.post('/', controller.addUser);
+router.post('/register', controller.addUser);
 
 router.post('/myLinks', controller.addLink);
 

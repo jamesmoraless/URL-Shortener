@@ -1,6 +1,9 @@
 //controller is used for handling requests and responses  
 const pool = require('../db');
-const queries = require('./queries')
+const queries = require('./queries');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 
 //get original and short links from an account username 
 const getLinks = (req, res) => {
@@ -23,20 +26,29 @@ const getOLinkByShort = (req, res) => {
 };
 
 
-const addUser = (req, res) => {
+const addUser = async (req, res) => {
+  try{
   const {username, password} = req.body;//create a password for the user 
+
   //check if username exists 
-  pool.query(queries.checkUsernameExists, [username], (err, results)=>{    
-    if (results.rows.length){
-      res.send("Username already exists. Try another username.");
-    }
-    //add user to db IF username does not exist 
-    pool.query(queries.addUser, [username, password], (err, results) =>{
-      if (err) throw err;
-      res.status(201).send("succesfully added user");//I want this to then send you to a new page that welcomes you 
-      //and then allows you to shorten links 
-    });
-  });
+  const user = await pool.query(queries.checkUsernameExists, [username]);    
+  
+  if (user.rows.length > 0){
+    return res.status(400).json({ message : 'User already exists'});
+  }
+
+  // Hash the password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  //add user to db IF username does not exist 
+  const newUser = await pool.query(queries.addUser, [username, hashedPassword]);
+  res.status(201).json(newUser.rows[0]);//I want this to then send you to a new page that welcomes you 
+    //and then allows you to shorten links 
+    }catch (error){
+      console.error(err.message);
+      res.status(500).send('Server error');
+}
 };
 
 ////must add a storeLink method that:
