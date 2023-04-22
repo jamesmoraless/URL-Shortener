@@ -3,6 +3,7 @@ const pool = require('../db');
 const queries = require('./queries');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nanoid = require('nanoid').nanoid;
 
 
 //get original and short links from an account username 
@@ -47,9 +48,56 @@ const addUser = async (req, res) => {
     //and then allows you to shorten links 
     }catch (error){
       console.error(err.message);
-      res.status(500).send('Server error');
+      res.status(500).send('Server error.');
 }
 };
+
+const logUser = async (req, res) => {
+  try{
+  const {username, password} = req.body;//create a password for the user 
+
+  //check if username exists 
+  const user = await pool.query(queries.checkUsernameExists, [username]);    
+  
+  if (user.rows.length > 0){
+    return res.status(400).json({ message : 'Invalid username. Try again.'});
+  }
+
+  // Check if password matches
+  const isMatch = await bcrypt.compare(password, user.rows[0].password);
+  if (!isMatch) {
+    return res.status(400).json({ message: 'Invalid password. Try again.' });
+  }
+
+  // Generate and return JWT
+  const payload = {
+    user: {
+    id: user.rows[0].id,
+    },
+    };
+    jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' }, (err, token) => {
+      if (err) throw err;
+      res.json({ token });
+    });} catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error.');
+    }
+    };
+    
+
+  /* // Hash the password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  //add user to db IF username does not exist 
+  const newUser = await pool.query(queries.addUser, [username, hashedPassword]);
+  res.status(201).json(newUser.rows[0]);//I want this to then send you to a new page that welcomes you 
+    //and then allows you to shorten links 
+    }catch (error){
+      console.error(err.message);
+      res.status(500).send('Server error');
+}
+}; */
 
 ////must add a storeLink method that:
 //stores the original link 
@@ -78,6 +126,7 @@ module.exports = {
   getLinks,
   getOLinkByShort,
   addUser,
+  logUser,
   addLink,
 };
 
