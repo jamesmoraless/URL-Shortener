@@ -3,40 +3,41 @@ const pool = require('../db');
 const queries = require('./queries')
 
 //get original and short links from an account username 
-//must add the username checking functionality 
 const getLinks = (req, res) => {
-  pool.query(queries.getLinks, (err, results)=>{
+  const {username} = req.body;
+  pool.query(queries.getLinks, [username], (err, results)=>{
     if (err) throw err;
     res.status(200).json(results.rows);
   })
 };
+
 //get redirected to the original link with the short link id
 const getOLinkByShort = (req, res) => {
   const id = parseInt(req.params.id);
   pool.query(queries.getOLinkByShort, [id], (err, results)=>{
     if(err) throw err;
+    if (results.rows){
     res.status(200).redirect(results.rows[0].originallink);
+  }
   });
 };
 
 
 const addUser = (req, res) => {
   const {username, password} = req.body;//create a password for the user 
-
   //check if username exists 
   pool.query(queries.checkUsernameExists, [username], (err, results)=>{    
     if (results.rows.length){
       res.send("Username already exists. Try another username.");
     }
-  });
-  //add user to db
-  pool.query(queries.addUser, [username, password], (err, results) =>{
-    if (err) throw err;
-    res.status(200).send("succesfully added user");//I want this to then send you to a new page that welcomes you 
-    //and then allows you to shorten links 
+    //add user to db IF username does not exist 
+    pool.query(queries.addUser, [username, password], (err, results) =>{
+      if (err) throw err;
+      res.status(201).send("succesfully added user");//I want this to then send you to a new page that welcomes you 
+      //and then allows you to shorten links 
+    });
   });
 };
-
 
 ////must add a storeLink method that:
 //stores the original link 
@@ -48,8 +49,8 @@ const addLink = (req, res) => {
   pool.query(queries.addLink, [username, originallink, shortlink], (err, results) => {
     if (err) throw err;
     res.status(200).send("succesfully added a link");
-  })
-}
+  });
+};
 
 ////must add a deleteLink method that:
 //once you click a button on the html site, you can delete this row 
@@ -67,6 +68,7 @@ module.exports = {
   addUser,
   addLink,
 };
+
 
 /*
 const DatabaseService = require("../service.js");
