@@ -3,7 +3,7 @@ const pool = require('../db');
 const queries = require('./queries');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nanoid = require('nanoid').nanoid;
+//const nanoid = require('nanoid').nanoid;
 
 
 //get original and short links from an account username 
@@ -57,9 +57,9 @@ const logUser = async (req, res) => {
   const {username, password} = req.body;//create a password for the user 
 
   //check if username exists 
-  const user = await pool.query(queries.checkUsernameExists, [username]);    
+  const user = await pool.query(queries.checkUsernameExists, [username]); 
   
-  if (user.rows.length > 0){
+  if (user.rows.length === 0){
     return res.status(400).json({ message : 'Invalid username. Try again.'});
   }
 

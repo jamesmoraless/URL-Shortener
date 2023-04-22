@@ -14,6 +14,8 @@ router.get('/:id', controller.getOLinkByShort);//get redirected to the original 
 
 router.post('/register', controller.addUser);
 
+router.post('/login', controller.logUser);
+
 router.post('/myLinks', controller.addLink);
 
 
