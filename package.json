@@ -4,7 +4,10 @@
   "description": "- Familiarize oneself with git commands and git/github interactions \r - Create README.md file in the desired local folder \r - Stage, Commit and Push changes to an empty github repo \r - Add a .js file in the folder and begin step 2",
   "main": "index.js",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.3",
     "express": "^4.18.1",
+    "jsonwebtoken": "^9.0.0",
     "pg": "^8.10.0",
     "sqlite3": "^5.0.8"
   },
