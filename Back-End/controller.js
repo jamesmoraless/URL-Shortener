@@ -24,7 +24,7 @@ const addUser = async (req, res) => {
   const newUser = await pool.query(queries.addUser, [username, hashedPassword]);
   res.status(201).json(newUser.rows[0]);//I want this to then send you to a new page that welcomes you 
     //and then allows you to shorten links 
-    }catch (error){
+    }catch (err){
       console.error(err.message);
       res.status(500).send('Server error.');
 }
