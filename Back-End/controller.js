@@ -111,14 +111,17 @@ const logUser = async (req, res) => {
     try{
       const userId = req.user.id;
       //Fetch the URL statistics from the db
-      const stats = await pool.query(queries.getLinks, [userId]);
-      //console.log(stats);
+      /* const stats = await pool.query(queries.getLinks, [userId]);
+      console.log(stats);
       const statsObj = stats.rows.reduce((acc, row) => {
         acc[row.long_url] = row.url_count;
         return acc;
       }, {});
       res.json(statsObj);
-
+ */
+      const results = await pool.query(queries.getLinks, [userId]);
+      const urls = results.rows;
+      res.json(urls);
     }catch(err){
       console.error(err);
       res.status(500).send('Server error.')
